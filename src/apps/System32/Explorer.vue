@@ -27,14 +27,15 @@
 </template>
 
 <script>
+import { basename } from 'path-browserify';
 import NavigateSound from '../../assets/sounds/navigate.wav?url';
 import { rgba } from '../../styles/utils';
 import backIcon from '../../assets/icons/back.png?url';
 import FilesContainer from '../../components/FilesContainer.vue';
 import { props, inject } from '../../utils/vue';
-import { getFileType } from '../../services/apps';
 import { reverseSlash } from '../../services/fs';
-import { basename } from 'path-browserify';
+import { getFileType } from '../../utils/utils';
+import playSound from '../../services/snd';
 
 export default {
   ...inject('$fs', '$wm', '$snd'),
@@ -44,11 +45,6 @@ export default {
   }),
   components: {
     FilesContainer,
-  },
-  watch: {
-    path(n, o) {
-      this.updateTaskbar()
-    }
   },
   data() {
     const hasFile = this.filePath;
@@ -66,7 +62,7 @@ export default {
       return reversed.startsWith('\\') ? reversed.slice(1) : reversed;
     },
     searchPlaceholder() {
-      const path = this.path;
+      const { path } = this;
       const name = basename(path) || 'Computer';
       return `Search in ${name}`;
     },
@@ -81,18 +77,23 @@ export default {
       return obj;
     },
   },
+  watch: {
+    path() {
+      this.updateTaskbar();
+    },
+  },
   methods: {
     click(filePath) {
       const fileType = getFileType(filePath);
       if (fileType === 'directory') {
-        this.$snd.playSound(NavigateSound);
+        playSound(NavigateSound);
         this.path = filePath;
         return true;
       }
       return false;
     },
     back() {
-      this.$snd.playSound(NavigateSound);
+      playSound(NavigateSound);
       if (this.search) {
         this.search = null;
         return;
@@ -104,8 +105,8 @@ export default {
       }
     },
     updateTaskbar() {
-      this.$wm.updateToolbarTitle(this.wmId,this.path ? basename(this.path) : 'Computer')
-    }
+      this.$wm.updateToolbarTitle(this.wmId, this.path ? basename(this.path) : 'Computer');
+    },
   },
   style({ className }) {
     return [

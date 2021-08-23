@@ -5,6 +5,12 @@ import Loading from './Loading.vue';
 
 export default {
   name: 'WindowsContent',
+  props: {
+    window: {
+      required: true,
+      type: Object,
+    },
+  },
   data() {
     return {
       loading: false,
@@ -15,11 +21,6 @@ export default {
     const m = await fetchApp(this.window.appName, this.window.isSystemApp);
     this.module = m.default ? m.default : m;
   },
-  props: {
-    window: {
-      required: true,
-    },
-  },
   render() {
     if (this.loading) {
       return h(Loading);
@@ -28,6 +29,6 @@ export default {
       return null;
     }
     return h(this.module, this.window);
-  }
+  },
 };
 </script>

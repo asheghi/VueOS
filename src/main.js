@@ -5,8 +5,7 @@ import * as $fs from './services/fs';
 
 import { initFS } from './services/fs';
 
-
-(async ()=>{
+(async () => {
   await initFS();
 
   window.$fs = $fs;
@@ -17,5 +16,4 @@ import { initFS } from './services/fs';
   setTimeout(() => {
     document.body.classList.remove('loading');
   });
-
 })();

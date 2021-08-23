@@ -5,10 +5,10 @@
       <span @click="exit"> Exit </span>
     </div>
     <textarea
-      :disabled="loading"
       ref="textarea"
-      :placeholder="loading ? 'loading...' : null"
       v-model="value"
+      :disabled="loading"
+      :placeholder="loading ? 'loading...' : null"
     />
   </div>
 </template>
@@ -30,11 +30,16 @@ export default {
       saving: false,
     };
   },
+  computed: {
+    isNewFile() {
+      return !this.filePath;
+    },
+  },
   created() {
     if (this.filePath) {
       this.loading = true;
       this.$fs.fetchTextFile(this.filePath)
-        .then(data => {
+        .then((data) => {
           this.value = data;
           this.loading = false;
         });
@@ -43,18 +48,13 @@ export default {
   mounted() {
     this.$refs.textarea.focus();
   },
-  computed: {
-    isNewFile() {
-      return !this.filePath;
-    }
-  },
   methods: {
     exit() {
       this.$wm.closeWindow(this.wmId);
     },
     async onSaveClicked() {
-      let newFileName = `Text File ${Date.now()}.txt`;
-      let path = this.filePath || `/C:/User/Documents/${newFileName}`;
+      const newFileName = `Text File ${Date.now()}.txt`;
+      const path = this.filePath || `/C:/User/Documents/${newFileName}`;
       await this.$fs.writeTextFile(path, this.value);
       this.$wm.openDialog({
         type: 'info',

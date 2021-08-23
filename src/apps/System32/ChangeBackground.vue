@@ -8,17 +8,20 @@
         Click a picture to make it your desktop background.
       </p>
       <div :class="$style.box">
-          <img
-            v-for="(item, key) in list"
-            :key="key"
-            width="90"
-            height="60"
-            :src="item.src"
-            alt=""
-            @click="changeBackground(item)"
-          >
+        <img
+          v-for="(item, key) in list"
+          :key="key"
+          width="90"
+          height="60"
+          :src="item.src"
+          alt=""
+          @click="changeBackground(item)"
+        >
 
-        <div v-if="loading" class="loading">
+        <div
+          v-if="loading"
+          class="loading"
+        >
           <p>loading...</p>
         </div>
       </div>
@@ -29,7 +32,7 @@
 <script>
 import { props, inject } from '../../utils/vue';
 import { px } from '../../styles/utils';
-import { _downloadDefaultWallpapers, fetchFile, readDirectory } from '../../services/fs';
+import { downloadDefaultWallpapers, fetchFile, readDirectory } from '../../services/fs';
 
 export default {
   name: 'ChangeBackground',
@@ -41,22 +44,32 @@ export default {
   data() {
     return {
       list: [],
-      loading: true
+      loading: true,
     };
   },
   async mounted() {
-    await _downloadDefaultWallpapers();
+    this.loading = true;
+    // todo show downloading ...
+    await downloadDefaultWallpapers();
 
     const wallpapersFiles = await readDirectory('/C:/Windows/Wallpapers');
-    for (const file of wallpapersFiles) {
-      new Promise(async r => {
-        const buffer = await fetchFile(file);
-        this.list.push({
-          file,
-          src: URL.createObjectURL(new Blob([buffer],)),
-        })
-      })
-    }
+    const self = this;
+    const list = [];
+    // eslint-disable-next-line no-restricted-syntax
+    wallpapersFiles.forEach((file) => {
+      const promise = new Promise((resolve) => {
+        fetchFile(file)
+          .then((buffer) => {
+            self.list.push({
+              file,
+              src: URL.createObjectURL(new Blob([buffer])),
+            });
+            resolve();
+          });
+      });
+      list.push(promise);
+    });
+    await Promise.all(list);
     this.loading = false;
   },
   methods: {

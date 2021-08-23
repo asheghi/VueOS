@@ -1,13 +1,11 @@
-export const playSound = (soundSrc) => {
+export default function playSound(soundSrc) {
   const audioTag = document.createElement('audio');
   audioTag.src = soundSrc;
 
-  let addedEventListener = false;
   audioTag.play()
-    .catch(e => {
+    .catch(() => {
       window.addEventListener('click', () => {
         playSound(soundSrc);
       }, { once: true });
     });
-};
-
+}

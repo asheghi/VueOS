@@ -65,14 +65,6 @@ export default {
       rightFiles: [],
     };
   },
-  async created() {
-    this.fetchLeftFiles();
-
-    this.$fs.readDirectory('/C:/User/Start Menu')
-      .then(files => {
-        this.rightFiles = [...files];
-      });
-  },
   computed: {
     leftContainerFiles() {
       return this.leftFiles;
@@ -82,7 +74,7 @@ export default {
     },
   },
   watch: {
-    searchString(n, o) {
+    searchString() {
       this.fetchLeftFiles();
     },
     popup(popup) {
@@ -97,6 +89,14 @@ export default {
       }
     },
   },
+  async created() {
+    this.fetchLeftFiles();
+
+    this.$fs.readDirectory('/C:/User/Start Menu')
+      .then((files) => {
+        this.rightFiles = [...files];
+      });
+  },
   methods: {
     showPopup() {
       this.searchString = '';
@@ -106,19 +106,19 @@ export default {
       this.leftFiles = [];
       const {
         searchString,
-        $fs
+        $fs,
       } = this;
       if (searchString && searchString.trim().length) {
-        $fs.searchInDirectory('/C:/Program Files', searchString, file => {
+        $fs.searchInDirectory('/C:/Program Files', searchString, (file) => {
           this.leftFiles.push(file);
         });
       } else {
         $fs.readDirectory('/C:/Program Files')
-          .then(files => {
+          .then((files) => {
             this.leftFiles = [...files];
           });
       }
-    }
+    },
   },
   style({ className }) {
     const height = '600px';

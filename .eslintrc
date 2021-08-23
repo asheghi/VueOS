@@ -2,5 +2,13 @@
   "extends": [
     "airbnb-base",
     "plugin:vue/vue3-recommended"
-  ]
+  ],
+  "rules": {
+    "import/no-unresolved": "off",
+    "no-console" : "off",
+    "max-len": "off",
+    "vue/html-closing-bracket-spacing": "off",
+    "no-plusplus": "off",
+    "no-tabs": "off"
+  }
 }

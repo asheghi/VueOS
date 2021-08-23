@@ -1,8 +1,8 @@
 {
-  "name": "win7",
-  "version": "1.0.0",
-  "description": "Yet another OS preview via web technologies focused on Microsoft Windows 7",
-  "author": "Amir Momenian <nainemom@gmail.com>",
+  "name": "VueOS",
+  "version": "0.0.1",
+  "description": "Vue as a web desktop platform. This is a demonstration of what web technologies can do",
+  "author": "Seyyed Hassan Asheghi",
   "private": true,
   "scripts": {
     "dev": "vite",
@@ -10,16 +10,12 @@
     "serve": "vite preview",
     "lint": "eslint --ext .js,vue --ignore-path .gitignore .",
     "lint:fix": "npm run lint -- --fix",
-    "deploy": "npm run build -- --base=/win7/ && node build/deploy.js"
+    "deploy-gh": "npm run build -- --base=/VueOS/ && node build/deploy.js"
   },
   "dependencies": {
-    "@ffmpeg/core": "^0.10.0",
-    "@ffmpeg/ffmpeg": "^0.10.1",
     "browserfs": "^1.4.3",
     "eventemitter2": "^6.4.4",
-    "file-type": "^16.5.3",
     "image-js": "^0.32.0",
-    "jsmediatags": "^3.9.7",
     "lodash.debounce": "^4.0.8",
     "music-metadata": "^7.11.3",
     "path-browserify": "^1.0.1",
@@ -29,7 +25,6 @@
   "devDependencies": {
     "@vitejs/plugin-vue": "^1.2.1",
     "@vue/compiler-sfc": "^3.0.5",
-    "datauri": "^3.0.0",
     "eslint": "^7.25.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",

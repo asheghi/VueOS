@@ -1,14 +1,11 @@
 import { reactive } from 'vue';
 import UnknownIcon from '../assets/icons/unknown.png?url';
 import {
-  resolveFileRunner,
-  resolveFileSource,
-  fileObject,
-  reverseSlash,
-  escapeShortcut
+  escapeShortcut,
 } from './fs';
-import { getAppForFilePath, getFileType, getFileWindowProperties } from './apps';
-import { getDialogWindowProperties } from '../utils/dialog';
+import { getAppForFilePath, getFileWindowProperties } from './apps';
+import getDialogWindowProperties from '../utils/dialog';
+import { getFileType } from '../utils/utils';
 
 export const state = reactive({
   started: false,
@@ -96,7 +93,7 @@ export const calculateFileWindowProperties = async (filePath) => {
   };
 };
 
-function makeWindow(windowProperties, appName, fileType, filePath) {
+function makeWindow(windowProperties) {
   const id = `w-${Date.now()}-${Math.random()}`;
   const win = {
     id,
@@ -107,16 +104,14 @@ function makeWindow(windowProperties, appName, fileType, filePath) {
 }
 
 function getWinByName(appName) {
-  return windows.list.find(it => {
-    return it.appName === appName;
-  });
+  return windows.list.find((it) => it.appName === appName);
 }
 
-export async function openFile(filePath) {
-  filePath = await escapeShortcut(filePath);
+export async function openFile(arg) {
+  const filePath = await escapeShortcut(arg);
   const fileType = getFileType(filePath);
   const appName = await getAppForFilePath(filePath);
-  let windowProperties = await calculateFileWindowProperties(filePath);
+  const windowProperties = await calculateFileWindowProperties(filePath);
   windowProperties.appName = appName;
   windowProperties.callbacks = {};
 
@@ -136,8 +131,7 @@ export async function openFile(filePath) {
 
   const win = makeWindow(windowProperties);
   windows.list.push(win);
-  return win;
-};
+}
 
 export const openDialog = (options) => {
   const base = getDialogWindowProperties(options.type || 'warning');
@@ -149,7 +143,7 @@ export const openDialog = (options) => {
     defaultInput: '',
     autoClose: true,
     zIndex: latestZIndex,
-    onClick: (btn) => {
+    onClick: () => {
     },
     ...base,
     ...options,

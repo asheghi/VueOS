@@ -5,16 +5,6 @@ const captureOptions = {
   capture: true,
 };
 
-function getBuffer(fileBlob, resolve) {
-  const reader = new FileReader();
-  reader.readAsArrayBuffer(fileBlob);
-  reader.onload = function () {
-    const arrayBuffer = reader.result;
-    const bytes = new Uint8Array(arrayBuffer);
-    resolve(bytes);
-  };
-}
-
 export const drag = (bindingElement = null, handler) => {
   const handlerParent = (event) => {
     const userAnswer = handler(event);
@@ -39,7 +29,7 @@ export const drag = (bindingElement = null, handler) => {
 function getDroppedFiles(event) {
   let i;
   const ev = event;
-  let files = [];
+  const files = [];
   if (ev.dataTransfer.items) {
     // Use DataTransferItemList interface to access the file(s)
     for (i = 0; i < ev.dataTransfer.items.length; i++) {
@@ -61,10 +51,10 @@ function getDroppedFiles(event) {
 export const drop = (bindingElement = null, path, handler) => {
   const handlerParent = async (event) => {
     event.preventDefault();
-    let files = getDroppedFiles(event);
+    const files = getDroppedFiles(event);
 
     if (files.length) {
-      await handleDrop(path,files);
+      await handleDrop(path, files);
       return;
     }
 

@@ -45,13 +45,12 @@
 </template>
 
 <script>
+import { basename } from 'path-browserify';
 import { inject, props } from '../utils/vue';
 import ShortcutIcon from '../assets/icons/shortcut.png';
 import { rgba } from '../styles/utils';
-import { basename } from 'path-browserify';
-import { calculateFileWindowProperties } from '../services/wm';
 import { renamePath } from '../services/fs';
-import { getFileThumbnail, getFileWindowProperties } from '../services/apps';
+import { getFileThumbnail } from '../services/apps';
 
 export default {
   ...props({
@@ -64,21 +63,14 @@ export default {
     onClick: props.func(null),
   }),
   ...inject('$wm', '$fs', '$filesContainer'),
+  emits: ['refresh'],
   data() {
     return {
       selected: false,
-      showRename:false,
+      showRename: false,
       renaming: '',
       icon: null,
     };
-  },
-  watch: {
-    file(n, o) {
-      this.updateThumbnail();
-    }
-  },
-  async created() {
-    await this.updateThumbnail()
   },
   computed: {
     fileName() {
@@ -96,6 +88,14 @@ export default {
     isCopying() {
       return this.$wm.markedFiles.copyList.includes(this.file.path);
     },
+  },
+  watch: {
+    file() {
+      this.updateThumbnail();
+    },
+  },
+  async created() {
+    await this.updateThumbnail();
   },
   methods: {
     select() {
@@ -130,7 +130,7 @@ export default {
         if (this.$refs.renameInput) {
           this.$refs.renameInput.select();
         } else {
-          //todo fix this issue
+          // todo fix this issue
           console.error('$refs.renameInput was undefined!');
         }
       });
@@ -140,11 +140,11 @@ export default {
         renamePath(this.file, this.renaming);
       }
       this.showRename = false;
-      this.$emit('refresh')
+      this.$emit('refresh');
     },
     async updateThumbnail() {
-      this.icon = await getFileThumbnail(this.file)
-    }
+      this.icon = await getFileThumbnail(this.file);
+    },
   },
   style({ className }) {
     return [
@@ -192,9 +192,9 @@ export default {
             } : {
               width: 'auto',
             }),
-            minHeight:'34px',
-            maxHeight:'42px',
-           // borderRadius: '9px',
+            minHeight: '34px',
+            maxHeight: '42px',
+            // borderRadius: '9px',
             filter: `drop-shadow(0 2px 2px ${rgba(0, 0.3)})`,
           },
           '& > .shortcut': {

@@ -22,11 +22,9 @@
 
 <script>
 import NotifSound from '../../assets/sounds/notif.wav';
-import icon from '../../assets/icons/camera.png';
-import fileIcon from '../../assets/icons/jpg.png';
 import { props, inject } from '../../utils/vue';
 import { rgba } from '../../styles/utils';
-import { getPathName } from '../../services/fs';
+import playSound from '../../services/snd';
 
 export default {
   ...inject('$fs', '$snd'),
@@ -60,7 +58,7 @@ export default {
       canvas.getContext('2d').drawImage(this.$refs.video, 0, 0, canvas.width, canvas.height);
       const fileName = `Photo ${Date.now()}.jpg`;
       const filePath = `C:/User/Pictures/${fileName}`;
-      this.$snd.playSound(NotifSound);
+      playSound(NotifSound);
       this.$fs.createNewFile(this.$fs.fileObject(filePath, 'image', {
         value: canvas.toDataURL(),
       }));

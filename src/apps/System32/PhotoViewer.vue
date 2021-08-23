@@ -2,13 +2,25 @@
   <div class="PhotoViewer">
     <div class="imageContainer">
       <div class="white">
-        <div class="loading" v-if="loading">
+        <div
+          v-if="loading"
+          class="loading"
+        >
           Loading ...
         </div>
         <div
+          ref="imageContainer"
+          class="image-container"
+          :class="{realSize:realSize,zoomMode,}"
           @contextmenu="openContextMenu"
-          class="image-container" ref="imageContainer" :class="{realSize:realSize,zoomMode,}">
-          <img ref="image" v-if="!loading &&  src" :src="src" alt="" :style="imageStyleObj">
+        >
+          <img
+            v-if="!loading && src"
+            ref="image"
+            :src="src"
+            alt=""
+            :style="imageStyleObj"
+          >
         </div>
       </div>
     </div>
@@ -16,114 +28,142 @@
       <div class="rounded">
         <div class="left">
           <div class="zoom">
-            <img @click="switchZoom" width="24" :src="IconZoomIn" alt="">
-            <div v-if="zoomMode" class="zoom-slider">
-              <input v-model="zoom" type="range" orient="vertical" min="1" max="100">
+            <img
+              width="24"
+              :src="IconZoomIn"
+              alt=""
+              @click="switchZoom"
+            >
+            <div
+              v-if="zoomMode"
+              class="zoom-slider"
+            >
+              <input
+                v-model="zoom"
+                type="range"
+                orient="vertical"
+                min="1"
+                max="100"
+              >
             </div>
           </div>
-          <div class="size" @click="switchMode">
-            <img width="24" :src="IconZoomFit" alt="">
+          <div
+            class="size"
+            @click="switchMode"
+          >
+            <img
+              width="24"
+              :src="IconZoomFit"
+              alt=""
+            >
           </div>
         </div>
         <div class="center">
-          <div class="previous" @click="showPrev" :class="!prevImage ? 'disable' : ''">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 style="transform: rotate(180deg)"
-                 width="24"
-                 height="24"
-                 viewBox="0 0 30 30"
-            >
-              <path
-                d="M 7 6 A 1 1 0 0 0 6 7 A 1 1 0 0 0 6 7.0039062 L 6 15 L 6 22.996094 A 1 1 0 0 0 6 23 A 1 1 0 0 0 7 24 A 1 1 0 0 0 7.5917969 23.804688 L 7.59375 23.804688 A 1 1 0 0 0 7.6210938 23.783203 L 18.541016 15.841797 A 1 1 0 0 0 19 15 A 1 1 0 0 0 18.556641 14.169922 L 7.59375 6.1953125 A 1 1 0 0 0 7 6 z M 22.5 6 C 21.672 6 21 6.672 21 7.5 L 21 22.5 C 21 23.328 21.672 24 22.5 24 C 23.328 24 24 23.328 24 22.5 L 24 7.5 C 24 6.672 23.328 6 22.5 6 z"
-              ></path>
-            </svg>
+          <div
+            class="previous"
+            :class="!prevImage ? 'disable' : ''"
+            @click="showPrev"
+          >
+            <IconPrev/>
           </div>
-          <div @click="showSlide" class="playSlide">
+          <div
+            class="playSlide"
+            @click="showSlide"
+          >
             <div class="buttonPlay">
-              <img width="32" :src="IconImage" alt="">
+              <img
+                width="32"
+                :src="IconImage"
+                alt=""
+              >
             </div>
           </div>
-          <div class="next" @click="showNext" :class="!nextImage ? 'disable' : ''">
-            <svg xmlns="http://www.w3.org/2000/svg"
-                 width="24"
-                 height="24"
-                 viewBox="0 0 30 30"
-            >
-              <path
-                d="M 7 6 A 1 1 0 0 0 6 7 A 1 1 0 0 0 6 7.0039062 L 6 15 L 6 22.996094 A 1 1 0 0 0 6 23 A 1 1 0 0 0 7 24 A 1 1 0 0 0 7.5917969 23.804688 L 7.59375 23.804688 A 1 1 0 0 0 7.6210938 23.783203 L 18.541016 15.841797 A 1 1 0 0 0 19 15 A 1 1 0 0 0 18.556641 14.169922 L 7.59375 6.1953125 A 1 1 0 0 0 7 6 z M 22.5 6 C 21.672 6 21 6.672 21 7.5 L 21 22.5 C 21 23.328 21.672 24 22.5 24 C 23.328 24 24 23.328 24 22.5 L 24 7.5 C 24 6.672 23.328 6 22.5 6 z"
-              ></path>
-            </svg>
+          <div
+            class="next"
+            :class="!nextImage ? 'disable' : ''"
+            @click="showNext"
+          >
+            <IconNext/>
           </div>
         </div>
         <div class="right">
-          <div @click="rotateLeft" class="rotate-left">
-            <img width="24" :src="IconRotateLeft" alt="">
+          <div
+            class="rotate-left"
+            @click="rotateLeft"
+          >
+            <img
+              width="24"
+              :src="IconRotateLeft"
+              alt=""
+            >
           </div>
-          <div @click="rotateRight" class="rotate-right">
-            <img width="24" :src="IconRotateRight" alt="">
+          <div
+            class="rotate-right"
+            @click="rotateRight"
+          >
+            <img
+              width="24"
+              :src="IconRotateRight"
+              alt=""
+            >
           </div>
-          <div class="divider"></div>
-          <div @click="showDeleteDialog" class="delete">
-            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-              <linearGradient id="hbE9Evnj3wAjjA2RX0We2a" x1="7.534" x2="27.557" y1="7.534" y2="27.557"
-                              gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0" stop-color="#f44f5a"></stop>
-                <stop offset=".443" stop-color="#ee3d4a"></stop>
-                <stop offset="1" stop-color="#e52030"></stop>
-              </linearGradient>
-              <path fill="url(#hbE9Evnj3wAjjA2RX0We2a)"
-                    d="M42.42,12.401c0.774-0.774,0.774-2.028,0-2.802L38.401,5.58c-0.774-0.774-2.028-0.774-2.802,0	L24,17.179L12.401,5.58c-0.774-0.774-2.028-0.774-2.802,0L5.58,9.599c-0.774,0.774-0.774,2.028,0,2.802L17.179,24L5.58,35.599	c-0.774,0.774-0.774,2.028,0,2.802l4.019,4.019c0.774,0.774,2.028,0.774,2.802,0L42.42,12.401z"
-              ></path>
-              <linearGradient id="hbE9Evnj3wAjjA2RX0We2b" x1="27.373" x2="40.507" y1="27.373" y2="40.507"
-                              gradientUnits="userSpaceOnUse"
-              >
-                <stop offset="0" stop-color="#a8142e"></stop>
-                <stop offset=".179" stop-color="#ba1632"></stop>
-                <stop offset=".243" stop-color="#c21734"></stop>
-              </linearGradient>
-              <path fill="url(#hbE9Evnj3wAjjA2RX0We2b)"
-                    d="M24,30.821L35.599,42.42c0.774,0.774,2.028,0.774,2.802,0l4.019-4.019	c0.774-0.774,0.774-2.028,0-2.802L30.821,24L24,30.821z"
-              ></path>
-            </svg>
+          <div class="divider"/>
+          <div
+            class="delete"
+            @click="showDeleteDialog"
+          >
+            <IconDelete/>
           </div>
         </div>
       </div>
     </div>
-    <teleport v-if="slideShowMode" to="body">
-      <div class="PhotoViewer_slide-show" @click="showNext">
-        <img ref="imageSlideShow" v-if="!loading &&  src" :src="src" alt="" :class="realSize">
+    <teleport
+      v-if="slideShowMode"
+      to="body"
+    >
+      <div
+        class="PhotoViewer_slide-show"
+        @click="showNext"
+      >
+        <img
+          v-if="!loading && src"
+          ref="imageSlideShow"
+          :src="src"
+          alt=""
+          :class="realSize"
+        >
       </div>
     </teleport>
   </div>
 </template>
 
 <script>
-import { deleteFile, escapeShortcut, fetchFile, readDirectory, writeBuffer } from '../../services/fs';
-import { getFileType } from '../../services/apps';
-import { dirname, basename ,} from 'path-browserify';
+import { basename, dirname } from 'path-browserify';
+import Image from 'image-js';
+import {
+  deleteFile, escapeShortcut, fetchFile, readDirectory, writeBuffer,
+} from '../../services/fs';
 import IconZoomIn from '../../assets/icons/zoom-in.png';
 import IconZoomFit from '../../assets/icons/zoom-fit-best.png';
 import IconImage from '../../assets/icons/jpg.png';
 import IconRotateLeft from '../../assets/icons/object-rotate-left.png';
 import IconRotateRight from '../../assets/icons/object-rotate-right.png';
-import Image from 'image-js';
-import { closeWindow, openDialog, updateToolbarTitle } from '../../services/wm';
+import { closeWindow, openDialog } from '../../services/wm';
 import IconRecycleBin from '../../assets/icons/trashcan_full.png';
+import { getFileType } from '../../utils/utils';
+import IconDelete from './IconDelete.vue';
+import IconPrev from './IconPrev.vue';
+import IconNext from './IconNext.vue';
+import { props } from '../../utils/vue';
 
 export default {
   name: 'PhotoViewer',
-  props: {
-    filePath: {},
-    wmId: {},
-  },
-  inject:['$wm','$cnf','$fs'],
-  mounted() {
-    this.fetchImageFile();
-    this.fetchSiblingFiles();
-    this.updateWindowTitle();
-    document.addEventListener('keydown', this.onKeyboardKeyDown);
-  },
+  components: { IconNext, IconPrev, IconDelete },
+  inject: ['$wm', '$cnf', '$fs'],
+  ...props({
+    filePath: props.obj(null),
+    wmId: props.any(),
+  }),
   data() {
     return {
       src: null,
@@ -142,16 +182,54 @@ export default {
       imageHasListener: false,
     };
   },
-  beforeDestroy() {
-    document.removeEventListener('keydown', this.onKeyboardKeyDown);
+  computed: {
+    indexInSiblings() {
+      const current = this.currentFile;
+      return this.images.findIndex((f) => basename(f) === basename(current));
+    },
+    nextImage() {
+      if (!this.images || !this.images.length) return null;
+      if (this.indexInSiblings !== this.images.length - 1) {
+        return this.images[this.indexInSiblings + 1];
+      }
+      return this.images[0];
+    },
+    prevImage() {
+      if (!this.images || !this.images.length) return null;
+      if (this.indexInSiblings !== 0) {
+        return this.images[this.indexInSiblings - 1];
+      }
+      return this.images[this.images.length - 1];
+    },
+    imageStyleObj() {
+      const style = {};
+      if (this.zoomMode) {
+        const scale = this.zoom / 10;
+        const img = this.$refs.image;
+        const realWidth = img.naturalWidth;
+        const realHeight = img.naturalHeight;
+        style.width = `${parseInt(realWidth * scale, 10)}px`;
+        style.height = `${parseInt(realHeight * scale, 10)}px`;
+      }
+      return style;
+    },
   },
   watch: {
     currentFile(n, o) {
-      this.updateWindowTitle()
+      this.updateWindowTitle();
       if (n && n !== o) {
         this.fetchImageFile();
       }
     },
+  },
+  mounted() {
+    this.fetchImageFile();
+    this.fetchSiblingFiles();
+    this.updateWindowTitle();
+    document.addEventListener('keydown', this.onKeyboardKeyDown);
+  },
+  beforeUnmount() {
+    document.removeEventListener('keydown', this.onKeyboardKeyDown);
   },
   methods: {
     async fetchImageFile() {
@@ -166,14 +244,15 @@ export default {
           const type = getFileType(path);
           if (type === 'image') {
             const buffer = await fetchFile(path, { encode: 'unit8array' });
-            this.src = URL.createObjectURL(new Blob([buffer],));
+            this.src = URL.createObjectURL(new Blob([buffer]));
           }
-          //image scroll
+          // image scroll
           if (!this.imageHasListener) {
             this.imageHasListener = true;
             this.registerImageDrag();
           }
         } catch (e) {
+          console.error(e);
         } finally {
           this.loading = false;
         }
@@ -182,18 +261,20 @@ export default {
     async fetchSiblingFiles() {
       const files = await readDirectory(dirname(this.filePath));
       this.images = [];
-      for (let file of files) {
+      const handler = async (file) => {
         const type = await getFileType(file);
         if (type === 'image') {
           this.images.push(file);
         }
-      }
+      };
+      await Promise.all(files.map(handler));
     },
     showNext() {
       if (this.nextImage) {
         this.currentFile = this.nextImage;
       } else {
-        this.currentFile = this.images[0];
+        const [first] = this.images;
+        this.currentFile = first;
       }
     },
     showPrev() {
@@ -219,8 +300,8 @@ export default {
       await writeBuffer(this.currentFile, rotated);
       await this.fetchImageFile();
     },
-    showDeleteDialog(image) {
-      //todo implement recycle bin
+    showDeleteDialog() {
+      // todo implement recycle bin
       openDialog({
         title: 'Delete File',
         content: 'Are you sure you want to delete this file?',
@@ -231,7 +312,7 @@ export default {
           }
         },
         icon: IconRecycleBin,
-        type: 'delete'
+        type: 'delete',
       });
     },
     async deleteImage() {
@@ -260,8 +341,7 @@ export default {
       this.slideShowMode = false;
     },
     onKeyboardKeyDown(event) {
-      const name = event.key;
-      const code = event.code;
+      const { code } = event;
 
       if (code === 'ArrowLeft') {
         this.showPrev();
@@ -290,10 +370,23 @@ export default {
         top: 0,
         left: 0,
         x: 0,
-        y: 0
+        y: 0,
       };
       let mouseIsDown = false;
-      const mouseUpHandler = function () {
+      const mouseMoveHandler = (e) => {
+        e.preventDefault();
+        if (!mouseIsDown) {
+          return;
+        }
+        // How far the mouse has been moved
+        const dx = e.clientX - pos.x;
+        const dy = e.clientY - pos.y;
+
+        // Scroll the element
+        imageContainerEl.scrollTop = pos.top - dy;
+        imageContainerEl.scrollLeft = pos.left - dx;
+      };
+      const mouseUpHandler = () => {
         mouseIsDown = false;
         imageContainerEl.style.cursor = 'auto';
         imageContainerEl.style.removeProperty('user-select');
@@ -301,12 +394,12 @@ export default {
         document.removeEventListener('mousemove', mouseMoveHandler);
         document.removeEventListener('mouseup', mouseUpHandler);
       };
-      imageContainerEl.addEventListener('mouseleave', function () {
+      imageContainerEl.addEventListener('mouseleave', () => {
         mouseIsDown = false;
         imageContainerEl.style.cursor = 'auto';
         imageContainerEl.style.removeProperty('user-select');
       });
-      const mouseDownHandler = function (e) {
+      const mouseDownHandler = (e) => {
         mouseIsDown = true;
         pos = {
           // The current scroll
@@ -321,86 +414,39 @@ export default {
         imageContainerEl.addEventListener('mousemove', mouseMoveHandler);
         imageContainerEl.addEventListener('mouseup', mouseUpHandler);
       };
-      const mouseMoveHandler = function (e) {
-        e.preventDefault();
-        if (!mouseIsDown) {
-          return;
-        }
-        // How far the mouse has been moved
-        const dx = e.clientX - pos.x;
-        const dy = e.clientY - pos.y;
-
-        // Scroll the element
-        imageContainerEl.scrollTop = pos.top - dy;
-        imageContainerEl.scrollLeft = pos.left - dx;
-      };
       imageContainerEl.addEventListener('mousedown', mouseDownHandler);
       imageContainerEl.addEventListener('wheel', (e) => {
         e.preventDefault();
         if (e.deltaY < 0) {
           this.zoom = Math.min(100, this.zoom + this.zoom / 10);
-        }else if(e.deltaY > 0){
+        } else if (e.deltaY > 0) {
           this.zoom = Math.max(1, this.zoom - this.zoom / 10);
         }
       });
     },
     updateWindowTitle() {
-      this.$wm.updateTitle(this.wmId,basename(this.currentFile) + '  - Photo Viewer');
-      this.$wm.updateToolbarTitle(this.wmId,this.currentFile ? basename(this.currentFile) : 'Photo Viewer');
+      this.$wm.updateTitle(this.wmId, `${basename(this.currentFile)}  - Photo Viewer`);
+      this.$wm.updateToolbarTitle(this.wmId, this.currentFile ? basename(this.currentFile) : 'Photo Viewer');
     },
     openContextMenu(e) {
       const CHANGE_WALLPAPER = 'Set as Wallpaper';
       const items = [CHANGE_WALLPAPER];
       const handler = async (item) => {
         if (item === CHANGE_WALLPAPER) {
-          //instant change
+          // instant change
           this.$cnf.setConfig({
             wallpaperPath: this.currentFile,
           });
-          //then copy after change so user won't notice any lag
-          const copied = await this.$fs.copyFile(this.currentFile, '/C:/Windows/Wallpapers',true);
+          // then copy after change so user won't notice any lag
+          const copied = await this.$fs.copyFile(this.currentFile, '/C:/Windows/Wallpapers', true);
           this.$cnf.setConfig({
             wallpaperPath: copied,
           });
         }
-      }
-      this.$wm.openContextMenu(e,items,handler)
-    }
+      };
+      this.$wm.openContextMenu(e, items, handler);
+    },
   },
-  computed: {
-    indexInSiblings() {
-      let current = this.currentFile;
-      return this.images.findIndex(f => basename(f) === basename(current));
-    },
-    nextImage() {
-      if (!this.images || !this.images.length) return null;
-      if (this.indexInSiblings !== this.images.length - 1) {
-        return this.images[this.indexInSiblings + 1];
-      } else {
-        return this.images[0];
-      }
-    },
-    prevImage() {
-      if (!this.images || !this.images.length) return null;
-      if (this.indexInSiblings !== 0) {
-        return this.images[this.indexInSiblings - 1];
-      } else {
-        return this.images[this.images.length - 1];
-      }
-    },
-    imageStyleObj() {
-      let style = {};
-      if (this.zoomMode) {
-        let scale = this.zoom / 10;
-        const img = this.$refs.image;
-        const realWidth = img.naturalWidth;
-        const realHeight = img.naturalHeight;
-        style.width = parseInt(realWidth * scale) + 'px';
-        style.height = parseInt(realHeight * scale) + 'px';
-      }
-      return style;
-    }
-  }
 };
 </script>
 
@@ -443,7 +489,7 @@ export default {
         }
 
         img {
-          margin:0!important;
+          margin: 0 !important;
           width: unset;
           height: unset;
           object-fit: unset;
@@ -595,7 +641,6 @@ export default {
             rgba(198, 198, 204, 0.3) 80%,
             rgba(229, 234, 255, 0.4) 100%
           );
-
 
           transition: 200ms;
 

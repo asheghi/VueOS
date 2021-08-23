@@ -13,8 +13,8 @@ import a12 from './12.jpg?url';
 import a13 from './13.jpg?url';
 import a14 from './14.jpg?url';
 
-export async function getWallpapersList() {
-  //todo use a dynamic way to import wallpapers
+export default async function getWallpapersList() {
+  // todo use a dynamic way to import wallpapers
   const list = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14];
   return list;
 }

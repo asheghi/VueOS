@@ -1,6 +1,7 @@
 <template>
   <div
     v-show="!window.hidden"
+    :id="'win-'+window.id"
     :class="[
       $style.window, focused && 'focused',
       window.maximized && 'maximized',
@@ -9,7 +10,6 @@
     ]"
     :style="{ zIndex: window.zIndex }"
     @click.capture="focus"
-    :id="'win-'+window.id"
   >
     <div :class="$style.titlebar">
       <div
@@ -54,11 +54,11 @@
       </div>
     </div>
     <WindowsContent
-      :window="window"
       ref="content"
+      :key="window.id"
+      :window="window"
       :class="$style.content"
       :wm-id="window.id"
-      :key="window.id"
     />
   </div>
 </template>

@@ -1,8 +1,8 @@
 <template>
   <div
     :class="$style.filesContainer"
-    @contextmenu="openContextMenu"
     :style="{cursor:loading ? 'wait' : 'inherit'}"
+    @contextmenu="openContextMenu"
   >
     <File
       v-for="file in dirFiles"
@@ -21,9 +21,10 @@
 </template>
 
 <script>
+import { dirname } from 'path-browserify';
 import { rgba, px } from '../styles/utils';
 import { props, provideAs, inject } from '../utils/vue';
-import { offsetTo, asyncEach } from '../utils/utils';
+import { offsetTo, isDirectory } from '../utils/utils';
 import swipe from '../utils/swipe';
 import { drag, drop } from '../utils/dragndrop';
 import File from './File.vue';
@@ -32,13 +33,10 @@ import {
   copyFile,
   createNewFolder,
   createNewTextFile,
-  deleteFile,
   deletePath,
-  isDirectory,
   isFile,
-  moveFile, registerToFsEvent
+  moveFile, registerToFsEvent,
 } from '../services/fs';
-import {dirname} from 'path-browserify';
 
 const fixSelectionPosition = (selection) => {
   if (!selection) {
@@ -68,7 +66,7 @@ export default {
     File,
   },
   ...props({
-    //todo default value not working
+    // todo default value not working
     path: props.str('/'),
     search: props.str(null),
     fileProps: props.obj(),
@@ -94,18 +92,6 @@ export default {
       },
     };
   },
-  watch: {
-    search(n, o) {
-      this.fetchDirectoryFiles();
-    },
-    path(n, o) {
-      if (this.unRegisterToFsEvent && typeof this.unRegisterToFsEvent === 'function') {
-        this.unRegisterToFsEvent();
-      }
-      this.unRegisterToFsEvent = registerToFsEvent(this.onFsEvent);
-      this.fetchDirectoryFiles();
-    }
-  },
   computed: {
     staticPath() {
       return this.path !== null;
@@ -117,8 +103,17 @@ export default {
       return this.path === 'C:/User/Desktop' && this.$parent.$options.name === 'Desktop';
     },
   },
-  beforeDestroy() {
-    this.unRegisterToFsEvent();
+  watch: {
+    search() {
+      this.fetchDirectoryFiles();
+    },
+    path() {
+      if (this.unRegisterToFsEvent && typeof this.unRegisterToFsEvent === 'function') {
+        this.unRegisterToFsEvent();
+      }
+      this.unRegisterToFsEvent = registerToFsEvent(this.onFsEvent);
+      this.fetchDirectoryFiles();
+    },
   },
   mounted() {
     this.unRegisterToFsEvent = registerToFsEvent(this.onFsEvent);
@@ -133,6 +128,7 @@ export default {
     this.fetchDirectoryFiles();
   },
   beforeUnmount() {
+    this.unRegisterToFsEvent();
     if (this.mover) {
       this.mover.stop();
     }
@@ -166,7 +162,7 @@ export default {
       this.copyOrMoveFilesHere('move', data);
     },
     getSelectedFiles() {
-      let selectedFiles = this.fileRefs.filter((file) => file.selected);
+      const selectedFiles = this.fileRefs.filter((file) => file.selected);
       return selectedFiles;
     },
     isEventOnFile(e) {
@@ -207,14 +203,14 @@ export default {
           selectedFiles.forEach((file) => file.click(null));
         } else if (item === 'Delete') {
           this.loading = true;
-          await Promise.all(selectedFiles.map(async file => {
+          await Promise.all(selectedFiles.map(async (file) => {
             const { file: filePath } = file;
             try {
               await deletePath(filePath);
             } catch (err) {
               console.error(err);
             }
-          }))
+          }));
           this.loading = false;
         } else if (item === 'Refresh') {
           await this.fetchDirectoryFiles();
@@ -228,12 +224,12 @@ export default {
           selectedFiles.forEach((file) => file.startRename());
         } else if (item === 'Cut') {
           selectedFiles.forEach((file) => {
-            let filePath = file.file;
+            const filePath = file.file;
             this.$wm.markFileForCut(filePath);
           });
         } else if (item === 'Copy') {
           selectedFiles.forEach((file) => {
-            let filePath = file.file;
+            const filePath = file.file;
             this.$wm.markFileForCopy(filePath);
           });
         } else if (item === 'Paste') {
@@ -316,16 +312,16 @@ export default {
       if (!_files.length) return;
       const files = [..._files];
       if (action === 'move') {
-        await Promise.all(files.map(file => moveFile(file, this.path)));
+        await Promise.all(files.map((file) => moveFile(file, this.path)));
       }
       if (action === 'copy') {
-        await Promise.all(files.filter(file => isFile(file))
-          .map(file => copyFile(file, this.path)));
+        await Promise.all(files.filter((file) => isFile(file))
+          .map((file) => copyFile(file, this.path)));
 
         if (files.filter(isDirectory).length) {
           await Promise.all(
-            files.filter(file => isDirectory(file))
-              .map(file => copyDirectory(file, this.path))
+            files.filter((file) => isDirectory(file))
+              .map((file) => copyDirectory(file, this.path)),
           );
         }
       }
@@ -357,15 +353,15 @@ export default {
     onFsEvent(name, ...values) {
       const [file] = values;
       if (dirname(file) === this.path) {
-        //then we should care what happened
+        // then we should care what happened
         if (name === 'created') {
-          this.files = [...this.files.filter(f => f !== file), file];
+          this.files = [...this.files.filter((f) => f !== file), file];
         }
         if (name === 'deleted') {
-          this.files = this.files.filter(f => f !== file);
+          this.files = this.files.filter((f) => f !== file);
         }
       }
-    }
+    },
   },
   style({ className }) {
     return [

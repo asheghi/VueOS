@@ -1,7 +1,7 @@
 <template>
   <div
-    :class="$style.desktop"
     ref="desktop"
+    :class="$style.desktop"
   >
     <FilesContainer
       path="/C:/User/Desktop"
@@ -40,26 +40,27 @@ export default {
   },
   data() {
     return {
-      wallpaper:null,
-    }
-  },
-  async mounted() {
-    this.loadWallpaper()
-  },
-  watch: {
-    ['$cnf.values.wallpaperPath'](){
-      this.loadWallpaper();
-    }
+      wallpaper: null,
+    };
   },
   computed: {
     wallpaperFile() {
-      return this.$cnf.values.wallpaperPath
+      return this.$cnf.values.wallpaperPath;
     },
     contextMenuExtras() {
       return {
         'Change Background': this.openChangeBackground,
       };
     },
+  },
+  watch: {
+    // eslint-disable-next-line func-names
+    '$cnf.values.wallpaperPath': function () {
+      this.loadWallpaper();
+    },
+  },
+  async mounted() {
+    this.loadWallpaper();
   },
   methods: {
     openChangeBackground() {
@@ -68,12 +69,12 @@ export default {
     async loadWallpaper() {
       if (this.wallpaperFile) {
         const buffer = await fetchFile(this.wallpaperFile);
-        const src = URL.createObjectURL(new Blob([buffer],));
-        this.$refs.desktop.style.backgroundImage = 'url("'+src+'")';
-      }else{
-        this.$refs.desktop.style.backgroundImage = 'url("'+DefaultWallpaper+'")';
+        const src = URL.createObjectURL(new Blob([buffer]));
+        this.$refs.desktop.style.backgroundImage = `url("${src}")`;
+      } else {
+        this.$refs.desktop.style.backgroundImage = `url("${DefaultWallpaper}")`;
       }
-    }
+    },
   },
 };
 </script>

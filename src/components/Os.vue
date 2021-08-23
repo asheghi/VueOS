@@ -3,16 +3,16 @@
     :class="$style.os"
     @contextmenu.prevent
   >
-    <WelcomePage v-if="!isWmStarted"/>
+    <WelcomePage v-if="!isWmStarted" />
     <template v-else>
-      <Desktop/>
-      <Taskbar/>
+      <Desktop />
+      <Taskbar />
       <Window
         v-for="win in windowsList"
         :key="win.id"
         :window="win"
       />
-      <ContextMenu v-bind="contextMenu"/>
+      <ContextMenu v-bind="contextMenu" />
     </template>
   </div>
 </template>
@@ -77,7 +77,7 @@ export default {
   },
   style({
     className,
-    custom
+    custom,
   }) {
     return [
       className('os', {

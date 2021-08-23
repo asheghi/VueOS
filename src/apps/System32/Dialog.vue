@@ -30,13 +30,14 @@ import DingSound from '../../assets/sounds/ding.wav?url';
 import IconRecycleBin from '../../assets/icons/trashcan_full.png';
 import { props, inject } from '../../utils/vue';
 import { rgba } from '../../styles/utils';
+import playSound from '../../services/snd';
 
 const typeToIconMap = {
   error: ErrorIcon,
   info: InfoIcon,
   warning: WarningIcon,
   question: QuestionIcon,
-  delete:IconRecycleBin,
+  delete: IconRecycleBin,
 };
 
 const typeToSoundMap = {
@@ -44,20 +45,20 @@ const typeToSoundMap = {
   info: DingSound,
   warning: DingSound,
   question: DingSound,
-  delete:DingSound,
+  delete: DingSound,
 };
 
 export default {
   ...inject('$fs', '$wm', '$snd'),
   ...props({
     wmId: props.any(),
-    type:{},
-    content:{},
-    buttons:{},
-    title:{},
-    defaultInput:{},
-    autoClose:{},
-    onClick:{},
+    type: {},
+    content: {},
+    buttons: {},
+    title: {},
+    defaultInput: {},
+    autoClose: {},
+    onClick: {},
   }),
   computed: {
     icon() {
@@ -68,7 +69,7 @@ export default {
     },
   },
   mounted() {
-    this.$snd.playSound(this.sound);
+    playSound(this.sound);
   },
   methods: {
     emitClick(button) {
