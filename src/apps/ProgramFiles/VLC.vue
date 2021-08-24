@@ -27,7 +27,7 @@ export default {
     },
   },
   mounted() {
-    this.fetchVideoFile()
+    this.fetchVideoFile();
   },
   methods: {
     async transcodeVideo(argBuffer) {
@@ -56,7 +56,7 @@ export default {
             try {
               ffmpeg.exit();
             } catch (e) {
-
+              console.error(e);
             }
           };
 
@@ -159,8 +159,28 @@ export default {
         .subscribe();
     },
     async fetchVideoFile() {
-      const sourceBuffer = await fetchFile(this.filePath);
-      this.transcodeVideo(sourceBuffer);
+      const fileBuffer = await fetchFile(this.filePath);
+      const supportedMime = this.mediaPlayerSupported(fileBuffer);
+      console.log('Fucking support', supportedMime);
+      if (supportedMime) {
+        this.$refs.video.src = URL.createObjectURL(new Blob([fileBuffer]));
+        this.$refs.video.play();
+      } else {
+        await this.transcodeVideo(fileBuffer);
+      }
+    },
+    mediaPlayerSupported(arg) {
+      console.log('check', mp4.probe.tracks(arg));
+      const mimeCodec = `video/mp4; codecs="${mp4.probe
+        .tracks(arg)
+        .map(t => t.codec)
+        .join(',')}"`;
+      if ('MediaSource' in window && MediaSource.isTypeSupported(mimeCodec)) {
+        return mimeCodec;
+      } else {
+        console.error('Unsupported MIME type or codec: ', mimeCodec);
+        return false;
+      }
     }
   },
   beforeUnmount() {
