@@ -1,11 +1,10 @@
 import { reactive } from 'vue';
 import UnknownIcon from '../assets/icons/unknown.png?url';
-import {
-  escapeShortcut,
-} from './fs';
-import { getAppForFilePath, getFileWindowProperties } from './apps';
-import getDialogWindowProperties from '../utils/dialog';
+import { escapeShortcut, fetchTextFile } from './fs';
+import { getAppsForFilePath, getAppWindowProperties } from './apps';
+import getDialogWindowProperties, { getOpenWithDialogWindowProperties } from '../utils/dialog';
 import { getFileType } from '../utils/utils';
+import { getConfigItem, setConfig } from './cnf';
 
 export const state = reactive({
   started: false,
@@ -63,8 +62,8 @@ export const windows = reactive({
 
 let latestZIndex = 20;
 
-export const calculateFileWindowProperties = async (filePath) => {
-  const windowProperties = await getFileWindowProperties(filePath) || {};
+export const calculateAppWindowProperties = async (appName, filePath) => {
+  const windowProperties = await getAppWindowProperties(appName, filePath) || {};
   const getOr = (value, defaultvalue) => (typeof value === 'undefined' ? defaultvalue : value);
   const width = getOr(windowProperties.width, 400);
   const height = getOr(windowProperties.height, 400);
@@ -107,11 +106,8 @@ function getWinByName(appName) {
   return windows.list.find((it) => it.appName === appName);
 }
 
-export async function openFile(arg) {
-  const filePath = await escapeShortcut(arg);
-  const fileType = getFileType(filePath);
-  const appName = await getAppForFilePath(filePath);
-  const windowProperties = await calculateFileWindowProperties(filePath);
+async function openWindow(filePath, appName, fileType) {
+  const windowProperties = await calculateAppWindowProperties(appName, filePath);
   windowProperties.appName = appName;
   windowProperties.callbacks = {};
 
@@ -128,9 +124,75 @@ export async function openFile(arg) {
       }
     }
   }
+  const win = makeWindow(windowProperties);
+  windows.list.push(win);
+}
+
+export const showOpenWithDialog = (apps, handler, options) => {
+  const base = getOpenWithDialogWindowProperties();
+  const windowProperties = {
+    title: 'Open With',
+    autoClose: true,
+    zIndex: latestZIndex,
+    apps,
+    onAppSelected: handler,
+    ...base,
+    ...options,
+  };
 
   const win = makeWindow(windowProperties);
   windows.list.push(win);
+};
+
+export async function openFile(fileArg, appNameArg) {
+  const filePath = await escapeShortcut(fileArg);
+  const fileType = getFileType(filePath);
+  let appName = appNameArg;
+  if (fileType === 'app') {
+    appName = await fetchTextFile(filePath);
+  }
+  if (!appNameArg && !appName) {
+    const apps = await getAppsForFilePath(filePath);
+    if (!apps.length) {
+      throw new Error('cannot open this file');
+    }
+    if (apps.length > 1) {
+      // open with dialog
+      const configKey = `open-${fileType}-with`;
+      const alwaysApp = getConfigItem(configKey, null);
+      if (alwaysApp) {
+        await openFile(filePath, alwaysApp);
+      } else {
+        const onAppSelected = (app, remember) => {
+          openFile(filePath, app);
+          if (remember) {
+            setConfig({ [configKey]: app });
+          }
+        };
+        showOpenWithDialog(apps, onAppSelected, { filePath });
+      }
+      return;
+    }
+    const [first] = apps;
+    appName = first;
+  }
+  await openWindow(filePath, appName, fileType);
+}
+
+// triggers open with dialog
+export async function openFileWith(fileArg) {
+  const filePath = await escapeShortcut(fileArg);
+  const fileType = getFileType(filePath);
+  const apps = await getAppsForFilePath(filePath);
+
+  const configKey = `open-${fileType}-with`;
+  const onAppSelected = (app, remember) => {
+    openFile(filePath, app);
+    if (remember) {
+      setConfig({ [configKey]: app });
+    }
+  };
+  showOpenWithDialog(apps, onAppSelected, { filePath });
 }
 
 export const openDialog = (options) => {

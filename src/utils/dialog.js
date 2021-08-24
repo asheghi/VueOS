@@ -31,3 +31,27 @@ export default function getDialogWindowProperties(type) {
     icon: typeToIconMap[type],
   };
 }
+
+
+export function getOpenWithDialogWindowProperties() {
+  const width = 320;
+  const height = 300;
+  return {
+    appName: 'OpenWithDialog',
+    isSystemApp: true,
+    maximizable: false,
+    closable: true,
+    minimizable: true,
+    movable: true,
+    maximized: false,
+    minimized: false,
+    resizable: false,
+    hidden: false,
+    width,
+    height,
+    left: (window.innerWidth / 2) - (width / 2) + (Math.random() * 20) - 10,
+    top: (window.innerHeight / 2) - (height / 2) + (Math.random() * 20) - 10,
+    icon: QuestionIcon,
+  };
+}
+

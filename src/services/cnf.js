@@ -1,7 +1,7 @@
 /* eslint-disable import/prefer-default-export */
 import { reactive } from 'vue';
 
-const getConfigItem = (key, defaultValue) => {
+export const getConfigItem = (key, defaultValue) => {
   const userValue = localStorage.getItem(`config-${key}`);
   if (!userValue) return defaultValue;
   try {

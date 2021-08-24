@@ -1,6 +1,7 @@
 import appsMeta from '../apps/AppsMeta';
 import { escapeShortcut, fetchTextFile } from './fs';
 import { getFileType } from '../utils/utils';
+import { getConfigItem } from './cnf';
 
 export function fetchApp(name, isSystemApp) {
   if (isSystemApp) {
@@ -9,12 +10,10 @@ export function fetchApp(name, isSystemApp) {
   return import(`./../apps/ProgramFiles/${name}.vue`);
 }
 
-export function getAppForFilePath(filePath) {
+export function getAppsForFilePath(filePath) {
   const fileType = getFileType(filePath);
-  if (fileType === 'app') {
-    return fetchTextFile(filePath);
-  }
   const names = Object.keys(appsMeta);
+  const result = [];
   for (let i = 0; i < names.length; i++) {
     const appName = names[i];
     if (appsMeta[appName]) {
@@ -24,28 +23,36 @@ export function getAppForFilePath(filePath) {
           filePath,
           fileType,
         })) {
-          return appName;
+          result.push(appName);
         }
       }
     }
   }
-  return {};
+  return result;
 }
 
-export async function getFileWindowProperties(filePath) {
-  const escaped = await escapeShortcut(filePath);
-  const appName = await getAppForFilePath(escaped);
+export async function getAppWindowProperties(appName, filePath) {
   const { windowProperties } = appsMeta[appName] || {};
   if (!(windowProperties && typeof windowProperties === 'function')) {
     return {};
   }
-  const result = await windowProperties(escaped);
+  const result = await windowProperties(filePath);
   return result;
 }
 
 export async function getFileThumbnail(filePath) {
   const escaped = await escapeShortcut(filePath);
-  const appName = await getAppForFilePath(escaped);
+  const fileType = getFileType(escaped);
+  let appName = null;
+  if (fileType === 'app') {
+    appName = await fetchTextFile(escaped);
+  }
+  if (!appName) {
+    const configKey = `open-${fileType}-with`;
+    const preferredApp = getConfigItem(configKey, null);
+    const [first] = await getAppsForFilePath(escaped);
+    appName = preferredApp || first;
+  }
   const appMeta = appsMeta[appName] || {};
   const { windowProperties, thumbnail } = appMeta;
   if (thumbnail && typeof thumbnail === 'function') {

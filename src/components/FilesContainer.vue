@@ -24,7 +24,7 @@
 import { dirname } from 'path-browserify';
 import { rgba, px } from '../styles/utils';
 import { props, provideAs, inject } from '../utils/vue';
-import { offsetTo, isDirectory } from '../utils/utils';
+import { offsetTo, isDirectory, getFileType } from '../utils/utils';
 import swipe from '../utils/swipe';
 import { drag, drop } from '../utils/dragndrop';
 import File from './File.vue';
@@ -37,6 +37,7 @@ import {
   isFile,
   moveFile, registerToFsEvent,
 } from '../services/fs';
+import { openFileWith } from '../services/wm';
 
 const fixSelectionPosition = (selection) => {
   if (!selection) {
@@ -196,6 +197,12 @@ export default {
             'Rename',
           ];
         }
+        if (selectedFiles.length) {
+          const first = selectedFiles[0].file;
+          if (!['app','shortcut'].includes(getFileType(first))) {
+            contextMenuItems.splice(1, 0, 'Open With');
+          }
+        }
       }
 
       this.$wm.openContextMenu(e, contextMenuItems, async (item) => {
@@ -240,6 +247,9 @@ export default {
             .then(() => {
               this.$wm.unmarkFiles();
             });
+        } else if (item === 'Open With') {
+          const files = selectedFiles.map((it) => it.file);
+          await openFileWith(...files);
         } else if (this.contextMenuExtras[item]) {
           if (typeof this.contextMenuExtras[item] === 'function') {
             this.contextMenuExtras[item]();

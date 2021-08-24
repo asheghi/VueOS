@@ -17,6 +17,7 @@ import folderIcon from '../assets/icons/folder.png?url';
 import icon from '../assets/icons/background-capplet.png';
 import photoViewer from '../assets/icons/jpg.png';
 import VideoGenericIcon from '../assets/icons/video.png?url';
+import VlcMediaPlayer from '../assets/icons/vlc-media-player.png?url';
 import { getFileType } from '../utils/utils';
 
 export default {
@@ -43,6 +44,7 @@ export default {
     canHandle: ({ fileType }) => ['audio', 'video'].includes(fileType),
     windowProperties: async (file) => ({
       icon: MediaPlayerIcon,
+      title: 'Windows Media Player',
       height: 600,
       width: 600,
       resizable: true,
@@ -74,9 +76,46 @@ export default {
       return AudioFileIcon;
     },
   },
+  VLC: {
+    canHandle: ({ fileType }) => ['audio', 'video'].includes(fileType),
+    windowProperties: async (file) => ({
+      icon: VlcMediaPlayer,
+      title: 'VLC Media Player',
+      height: 600,
+      width: 600,
+      resizable: true,
+      maximizable: true,
+      isSystemApp: false,
+      taskbarTitle: !file || file.endsWith('.exe') ? 'VLC Media Player' : basename(file),
+      singleInstance: true,
+    }),
+    async thumbnail(file) {
+      const fileType = getFileType(file);
+      if (['audio'/* ,'video' */].includes(fileType)) {
+        try {
+          const path = await escapeShortcut(file);
+          const buffer = await fetchFile(path, { encode: 'unit8array' });
+          const data = await metaDataParseBuffer(new Uint8Array(buffer));
+          const common = data.common || {};
+          const pictures = common.picture || [];
+          if (pictures[0]) {
+            const cover = pictures[0];
+            return URL.createObjectURL(new Blob([cover.data]));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (fileType === 'video') {
+        return VideoGenericIcon;
+      }
+      return AudioFileIcon;
+    },
+  },
   Notepad: {
     canHandle: ({ fileType }) => fileType === 'text',
     windowProperties: (file) => ({
+      title: 'Note Pad',
       icon: file && !file.endsWith('.exe') ? textIcon : notePadIcon,
       width: 600,
       height: 500,
@@ -90,7 +129,7 @@ export default {
       const fileContent = await fetchTextFile(filePath);
       const parsed = JSON.parse(fileContent);
       return {
-        title: 'Method Draw',
+        title: 'Web App Runner',
         icon: webAppIcon,
         width: 600,
         height: 500,
