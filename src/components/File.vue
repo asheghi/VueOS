@@ -10,6 +10,7 @@
     @dblclick="click"
     @click="click"
     @pointerdown="selectIf"
+    :title="fileName"
   >
     <div
       v-if="!noIcon"

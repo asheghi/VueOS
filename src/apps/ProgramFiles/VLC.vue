@@ -27,26 +27,23 @@ export default {
     },
   },
   mounted() {
-    this.doTheWork();
+    this.fetchVideoFile()
   },
   methods: {
-    async doTheWork() {
-      console.log('doing the thing');
+    async transcodeVideo(argBuffer) {
 
       let duration = -1;
       const segment_duration = 1;
 
-      const bufferStream = () =>
+      const bufferStream = (sourceBuffer) =>
         new Observable(async subscriber => {
           const ffmpeg = createFFmpeg({
             log: false,
           });
 
           ffmpeg.setProgress((arg) => {
-            // console.log('progress:', arg);
             if (arg.duration) {
               duration = arg.duration;
-              console.log('Video Duration is:', duration);
             }
           });
 
@@ -55,7 +52,14 @@ export default {
           const readFile = file => ffmpeg.FS('readFile', file);
 
           await ffmpeg.load();
-          const sourceBuffer = await fetchFile(this.filePath);
+          this.onSicktir = () => {
+            try {
+              ffmpeg.exit();
+            } catch (e) {
+
+            }
+          };
+
           ffmpeg.FS(
             'writeFile',
             'input.mp4',
@@ -68,6 +72,8 @@ export default {
             .run(
               '-i',
               'input.mp4',
+              '-preset',
+              'ultrafast',
               '-g',
               '1',
               // Encode for MediaStream
@@ -90,11 +96,14 @@ export default {
               subscriber.complete();
             });
 
-          setInterval(() => {
+          this.interval = setInterval(() => {
             // periodically check for files that have been written
             if (fileExists(`${index + 1}.mp4`)) {
               subscriber.next(readFile(`${index}.mp4`));
               index++;
+              if (index > 0) {
+                ffmpeg.FS('unlink', `${index - 1}.mp4`);
+              }
             }
           }, 200);
         });
@@ -109,7 +118,7 @@ export default {
 
       const bufferStreamReady = combineLatest(
         mediaSourceOpen,
-        bufferStream()
+        bufferStream(argBuffer)
       )
         .pipe(map(([, a]) => a));
 
@@ -138,16 +147,10 @@ export default {
       zip(sourceBufferUpdateEnd, bufferStreamReady.pipe(skip(1)))
         .pipe(
           map(([sourceBuf, buffer]) => {
-            console.log('appending Buffer:', buffer.length / 1024);
-            console.log('mediaSource.duration is:', mediaSource.duration);
-
             let append_duration = segment_duration;
             if (mediaSource.duration + segment_duration > duration) {
               append_duration = duration - mediaSource.duration;
-              if(append_duration > 1) append_duration -= 1;
-              console.log('last segment!', append_duration);
             }
-            console.log('append duration', append_duration);
             mediaSource.duration += append_duration;
             sourceBuf.timestampOffset += append_duration;
             sourceBuf.appendBuffer(buffer.buffer);
@@ -155,14 +158,20 @@ export default {
         )
         .subscribe();
     },
+    async fetchVideoFile() {
+      const sourceBuffer = await fetchFile(this.filePath);
+      this.transcodeVideo(sourceBuffer);
+    }
   },
   beforeUnmount() {
+    clearInterval(this.interval);
     this.onSicktir();
   },
   data() {
     return {
       onSicktir: () => {
-      }
+      },
+      interval: null,
     };
   }
 };
@@ -170,8 +179,7 @@ export default {
 
 <style lang="scss">
 .VLC-MediaPlayer {
-  padding: 1rem;
-  background: white;
+  background: black;
 
   video {
     width: 100%;
